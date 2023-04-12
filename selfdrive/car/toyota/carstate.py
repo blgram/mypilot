@@ -14,7 +14,16 @@ _TRAFFIC_SINGAL_MAP = {
   65: "No overtake",
   66: "No overtake"
 }
-
+def _calculate_set_speed_offset_kph(v_cruise_kph):
+  offset = 0.0
+  debug_print = True
+  if v_cruise_kph <= 27 / CV.KPH_TO_MPH:
+    offset = 12 / CV.KPH_TO_MPH
+  elif v_cruise_kph <= 28 / CV.KPH_TO_MPH:
+    offset = 8 / CV.KPH_TO_MPH
+  elif v_cruise_kph <= 29 / CV.KPH_TO_MPH:
+    offset = 4 / CV.KPH_TO_MPH
+  return offset
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -108,7 +117,12 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in TSS2_CAR:
       self.acc_type = cp_cam.vl["ACC_CONTROL"]["ACC_TYPE"]
-
+     v_cruise_kph = ret.cruiseState.speed / CV.KPH_TO_MS
+    
+    self.set_speed_offset = _calculate_set_speed_offset_kph(v_cruise_kph) * CV.KPH_TO_MS
+    ret.cruiseState.speed = ret.cruiseState.speed - self.set_speed_offset
+    ret.cruiseState.speed = max(ret.cruiseState.speed, 0)
+    
       # KRKeegan - Add support for toyota distance button
       self.distance_btn = 1 if cp_cam.vl["ACC_CONTROL"]["DISTANCE"] == 1 else 0
       ret.distanceLines = cp.vl["PCM_CRUISE_SM"]["DISTANCE_LINES"]
