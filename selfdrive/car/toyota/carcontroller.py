@@ -8,7 +8,16 @@ from selfdrive.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR,
                                         MIN_ACC_SPEED, PEDAL_TRANSITION, CarControllerParams
 from selfdrive.car.toyota.interface import CarInterface
 from opendbc.can.packer import CANPacker
-
+def _calculate_set_speed_offset_kph(v_cruise_kph):
+  offset = 0.0
+  debug_print = True
+  if v_cruise_kph <= 27 / CV.KPH_TO_MPH:
+    offset = 12 / CV.KPH_TO_MPH
+  elif v_cruise_kph <= 28 / CV.KPH_TO_MPH:
+    offset = 8 / CV.KPH_TO_MPH
+  elif v_cruise_kph <= 29 / CV.KPH_TO_MPH:
+    offset = 4 / CV.KPH_TO_MPH
+  return offset
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 # constants for fault workaround
